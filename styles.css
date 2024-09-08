@@ -1,0 +1,26 @@
+/* نمط الأزرار العامة */
+button {
+    background-color: #38a169; /* لون الخلفية */
+    color: #fff; /* لون النص */
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease; /* تأثيرات الانتقال */
+}
+
+/* تأثير التمرير */
+button:hover {
+    background-color: #2f855a;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* تأثير النقر */
+button:active {
+    background-color: #2d6a4f;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}

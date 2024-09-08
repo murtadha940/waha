@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق محاسبي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #2d3748;
+            color: #edf2f7;
+            position: fixed;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .sidebar a {
+            display: block;
+            padding: 15px 20px;
+            color: #edf2f7;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin: 5px 0;
+        }
+        .sidebar a:hover {
+            background-color: #4a5568;
+            transform: scale(1.02);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        h1 {
+            color: #2b6cb0;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        .stats, .table-container, .customer-table-container, .payment-form-container, .inventory-container, .sales-container {
+            margin-bottom: 30px;
+        }
+        .stat-box, .customer-table-container, .payment-form-container, .inventory-container, .sales-container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .stat-box:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .stat-box h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .stat-box p {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .daily-payments, .customer-table, .payment-form-table, .inventory-table, .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .daily-payments th, .customer-table th, .payment-form-table th, .inventory-table th, .sales-table th, .daily-payments td, .customer-table td, .payment-form-table td, .inventory-table td, .sales-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .daily-payments th, .customer-table th, .payment-form-table th, .inventory-table th, .sales-table th {
+            background-color: #2b6cb0;
+            color: white;
+        }
+        .daily-payments td, .customer-table td, .payment-form-table td, .inventory-table td, .sales-table td {
+            background-color: #fff;
+        }
+        .add-customer-form, .payment-form, .add-product-form, .sales-form {
+            margin-top: 20px;
+        }
+        .add-customer-form input, .payment-form input, .add-product-form input, .payment-form select, .add-customer-form select, .add-customer-form button, .payment-form button, .add-product-form button, .sales-form input, .sales-form select, .sales-form button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: calc(100% - 22px);
+            font-size: 1em;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> تطبيق محاسبي</h2>
+        <a href="#" onclick="showSection('dashboard')"><i class="fas fa-tachometer-alt"></i> الرئيسية</a>
+        <a href="#" onclick="showSection('customers')"><i class="fas fa-users"></i> العملاء</a>
+        <a href="#" onclick="showSection('reports')"><i class="fas fa-file-alt"></i> التقارير</a>
+        <a href="#" onclick="showSection('sales')"><i class="fas fa-receipt"></i> الفواتير</a>
+        <a href="#" onclick="showSection('sale')"><i class="fas fa-shopping-cart"></i> قائمة البيع</a>
+        <a href="#" onclick="showSection('payments')"><i class="fas fa-credit-card"></i> تسديد الأقساط</a>
+        <a href="#" onclick="showSection('inventory')"><i class="fas fa-box"></i> المخزن</a>
+        <a href="#" onclick="showSection('settings')"><i class="fas fa-cogs"></i> الإعدادات</a>
+    </div>
+
+    <div class="main-content">
+        <!-- لوحة التحكم -->
+        <div id="dashboard" class="section active">
+            <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>إجمالي الإيرادات</h3>
+                    <p id="total-revenue">0 د.ع</p>
+                </div>
+                <div class="stat-box">
+                    <h3>إجمالي المصروفات</h3>
+                    <p id="total-expenses">0 د.ع</p>
+                </div>
+                <div class="stat-box">
+                    <h3>الأرباح/الخسائر</h3>
+                    <p id="total-profit">0 د.ع</p>
+                </div>
+                <div class="stat-box">
+                    <h3>الرصيد الكلي</h3>
+                    <p id="total-balance">0 د.ع</p>
+                </div>
+            </div>
+
+            <!-- عرض المدفوعات اليومية -->
+            <div class="table-container">
+                <h2>المدفوعات اليومية</h2>
+                <table class="daily-payments">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>المبلغ المدفوع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-payments-list">
+                        <!-- المدفوعات اليومية سيتم إضافتها هنا ديناميكيًا -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- العملاء -->
+        <div id="customers" class="section">
+            <h1><i class="fas fa-users"></i> العملاء</h1>
+            <div class="customer-table-container">
+                <h2>قائمة الزبائن</h2>
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>رقم الهاتف</th>
+                            <th>العنوان</th>
+                            <th>الحاجة المشتراة</th>
+                            <th>المبلغ المتبقي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-list">
+                        <!-- بيانات الزبائن سيتم إضافتها هنا ديناميكيًا -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- نموذج إضافة زبون جديد -->
+            <div class="add-customer-form">
+                <h2><i class="fas fa-user-plus"></i> إضافة زبون جديد</h2>
+                <input type="text" id="customer-name" placeholder="الاسم">
+                <input type="text" id="customer-phone" placeholder="رقم الهاتف">
+                <input type="text" id="customer-address" placeholder="العنوان">
+                <input type="text" id="customer-item" placeholder="الحاجة المشتراة">
+                <button onclick="addCustomer()">إضافة الزبون</button>
+            </div>
+        </div>
+
+        <!-- تسديد الأقساط -->
+        <div id="payments" class="section">
+            <h1><i class="fas fa-credit-card"></i> تسديد الأقساط</h1>
+            <div class="payment-form-container">
+                <h2>تسديد الأقساط</h2>
+                <select id="customer-select" onchange="showPaymentForm()">
+                    <option value="">اختر الزبون</option>
+                    <!-- سيتم ملء خيارات الزبائن هنا ديناميكيًا -->
+                </select>
+                <div id="payment-form" style="display: none;">
+                    <div id="payment-customer-info"></div>
+                    <table class="payment-form-table">
+                        <thead>
+                            <tr>
+                                <th>الدفعة</th>
+                                <th>المبلغ</th>
+                                <th>تاريخ الدفع</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payment-list">
+                            <!-- تفاصيل الدفع ستضاف هنا -->
+                        </tbody>
+                    </table>
+                    <div class="payment-form">
+                        <input type="number" id="payment-amount" placeholder="المبلغ المدفوع">
+                        <button onclick="submitPayment()">تسديد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المخزن -->
+        <div id="inventory" class="section">
+            <h1><i class="fas fa-box"></i> المخزن</h1>
+            <div class="inventory-container">
+                <h2>المنتجات في المخزن</h2>
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>المنتج</th>
+                            <th>الكمية</th>
+                            <th>السعر</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-list">
+                        <!-- بيانات المنتجات سيتم إضافتها هنا ديناميكيًا -->
+                    </tbody>
+                </table>
+
+                <!-- نموذج إضافة منتج جديد -->
+                <div class="add-product-form">
+                    <h2><i class="fas fa-box-plus"></i> إضافة منتج جديد</h2>
+                    <input type="text" id="product-name" placeholder="اسم المنتج">
+                    <input type="number" id="product-quantity" placeholder="الكمية">
+                    <input type="number" id="product-price" placeholder="السعر">
+                    <button onclick="addProduct()">إضافة المنتج</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة البيع -->
+        <div id="sale" class="section">
+            <h1><i class="fas fa-shopping-cart"></i> قائمة البيع</h1>
+            <div class="sales-container">
+                <h2>قائمة الفواتير</h2>
+                <select id="sale-customer-select">
+                    <option value="">اختر الزبون</option>
+                    <!-- سيتم ملء خيارات الزبائن هنا ديناميكيًا -->
+                </select>
+                <div class="sales-form">
+                    <h2>إضافة بيع جديد</h2>
+                    <select id="sale-product-select">
+                        <option value="">اختر المنتج</option>
+                        <!-- سيتم ملء خيارات المنتجات هنا ديناميكيًا -->
+                    </select>
+                    <input type="number" id="sale-quantity" placeholder="الكمية">
+                    <button onclick="addSale()">إضافة البيع</button>
+                </div>
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الزبون</th>
+                            <th>اسم المنتج</th>
+                            <th>الكمية</th>
+                            <th>السعر</th>
+                            <th>المجموع</th>
+                            <th>تاريخ البيع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-list">
+                        <!-- بيانات الفواتير سيتم إضافتها هنا ديناميكيًا -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- الإعدادات -->
+        <div id="settings" class="section">
+            <h1><i class="fas fa-cogs"></i> الإعدادات</h1>
+            <!-- محتوى الإعدادات -->
+        </div>
+    </div>
+
+    <script>
+        const customersData = [];
+        const inventoryData = [];
+        const salesData = [];
+        const paymentsData = [];
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            if (sectionId === 'customers') {
+                populateCustomerSelect();
+            } else if (sectionId === 'inventory') {
+                showInventory();
+            } else if (sectionId === 'sale') {
+                populateSaleCustomerSelect();
+                populateSaleProductSelect();
+                showSales();
+            }
+        }
+
+        function addCustomer() {
+            const name = document.getElementById('customer-name').value;
+            const phone = document.getElementById('customer-phone').value;
+            const address = document.getElementById('customer-address').value;
+            const item = document.getElementById('customer-item').value;
+
+            if (name && phone && address && item) {
+                customersData.push({ name, phone, address, item, amount: 0 });
+                showCustomers();
+                populateCustomerSelect();
+                document.getElementById('customer-name').value = '';
+                document.getElementById('customer-phone').value = '';
+                document.getElementById('customer-address').value = '';
+                document.getElementById('customer-item').value = '';
+            } else {
+                alert('يرجى ملء جميع الحقول بشكل صحيح.');
+            }
+        }
+
+        function showCustomers() {
+            const customersList = document.getElementById('customers-list');
+            customersList.innerHTML = '';
+
+            customersData.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.address}</td>
+                    <td>${customer.item}</td>
+                    <td>${customer.amount.toLocaleString()} د.ع</td>
+                `;
+                customersList.appendChild(row);
+            });
+        }
+
+        function populateCustomerSelect() {
+            const customerSelect = document.getElementById('customer-select');
+            const saleCustomerSelect = document.getElementById('sale-customer-select');
+            customerSelect.innerHTML = '<option value="">اختر الزبون</option>';
+            saleCustomerSelect.innerHTML = '<option value="">اختر الزبون</option>';
+
+            customersData.forEach((customer, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = customer.name;
+                customerSelect.appendChild(option);
+                saleCustomerSelect.appendChild(option.cloneNode(true));
+            });
+        }
+
+        function showPaymentForm() {
+            const customerIndex = document.getElementById('customer-select').value;
+            const paymentForm = document.getElementById('payment-form');
+            const paymentCustomerInfo = document.getElementById('payment-customer-info');
+            const paymentList = document.getElementById('payment-list');
+            paymentList.innerHTML = '';
+
+            if (customerIndex !== '') {
+                const customer = customersData[customerIndex];
+                paymentCustomerInfo.innerHTML = `
+                    <strong>الاسم:</strong> ${customer.name}<br>
+                    <strong>المبلغ المتبقي:</strong> ${customer.amount.toLocaleString()} د.ع
+                `;
+                const numInstallments = 5;
+                const installmentAmount = customer.amount / numInstallments;
+
+                for (let i = 1; i <= numInstallments; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>الدفعة ${i}</td>
+                        <td>${installmentAmount.toLocaleString()} د.ع</td>
+                        <td><input type="date" id="payment-date-${i}"></td>
+                    `;
+                    paymentList.appendChild(row);
+                }
+                paymentForm.style.display = 'block';
+            } else {
+                paymentForm.style.display = 'none';
+            }
+        }
+
+        function submitPayment() {
+            const customerIndex = document.getElementById('customer-select').value;
+            const amount = parseFloat(document.getElementById('payment-amount').value);
+            const customer = customersData[customerIndex];
+
+            if (customerIndex !== '' && !isNaN(amount) && amount > 0) {
+                customer.amount -= amount;
+                showCustomers();
+                document.getElementById('payment-amount').value = '';
+                showPaymentForm();
+            } else {
+                alert('يرجى إدخال مبلغ صحيح.');
+            }
+        }
+
+        function addProduct() {
+            const name = document.getElementById('product-name').value;
+            const quantity = parseFloat(document.getElementById('product-quantity').value);
+            const price = parseFloat(document.getElementById('product-price').value);
+
+            if (name && !isNaN(quantity) && !isNaN(price)) {
+                inventoryData.push({ name, quantity, price });
+                showInventory();
+                populateSaleProductSelect();
+                document.getElementById('product-name').value = '';
+                document.getElementById('product-quantity').value = '';
+                document.getElementById('product-price').value = '';
+            } else {
+                alert('يرجى ملء جميع الحقول بشكل صحيح.');
+            }
+        }
+
+        function showInventory() {
+            const inventoryList = document.getElementById('inventory-list');
+            inventoryList.innerHTML = '';
+
+            inventoryData.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.quantity}</td>
+                    <td>${product.price.toLocaleString()} د.ع</td>
+                `;
+                inventoryList.appendChild(row);
+            });
+        }
+
+        function populateSaleProductSelect() {
+            const saleProductSelect = document.getElementById('sale-product-select');
+            saleProductSelect.innerHTML = '<option value="">اختر المنتج</option>';
+
+            inventoryData.forEach((product, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = product.name;
+                saleProductSelect.appendChild(option);
+            });
+        }
+
+        function populateSaleCustomerSelect() {
+            const saleCustomerSelect = document.getElementById('sale-customer-select');
+            saleCustomerSelect.innerHTML = '<option value="">اختر الزبون</option>';
+
+            customersData.forEach((customer, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = customer.name;
+                saleCustomerSelect.appendChild(option);
+            });
+        }
+
+        function addSale() {
+            const customerIndex = document.getElementById('sale-customer-select').value;
+            const productIndex = document.getElementById('sale-product-select').value;
+            const quantity = parseFloat(document.getElementById('sale-quantity').value);
+            const customer = customersData[customerIndex];
+            const product = inventoryData[productIndex];
+
+            if (customerIndex !== '' && productIndex !== '' && !isNaN(quantity) && quantity > 0) {
+                const totalAmount = quantity * product.price;
+                salesData.push({ customer: customer.name, product: product.name, quantity, price: product.price, total: totalAmount, date: new Date().toLocaleDateString() });
+                customer.amount = (customer.amount || 0) + totalAmount;
+                showSales();
+                showCustomers();
+                printInvoice(customer.name, product.name, quantity, product.price, totalAmount);
+                document.getElementById('sale-quantity').value = '';
+            } else {
+                alert('يرجى إدخال جميع الحقول بشكل صحيح.');
+            }
+        }
+
+        function showSales() {
+            const salesList = document.getElementById('sales-list');
+            salesList.innerHTML = '';
+
+            salesData.forEach(sale => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${sale.customer}</td>
+                    <td>${sale.product}</td>
+                    <td>${sale.quantity}</td>
+                    <td>${sale.price.toLocaleString()} د.ع</td>
+                    <td>${sale.total.toLocaleString()} د.ع</td>
+                    <td>${sale.date}</td>
+                `;
+                salesList.appendChild(row);
+            });
+        }
+
+        function printInvoice(customerName, productName, quantity, price, total) {
+            const invoiceWindow = window.open('', '', 'width=600,height=400');
+            invoiceWindow.document.write(`
+                <html>
+                <head>
+                    <title>فاتورة بيع</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                        }
+                        .invoice-container {
+                            width: 100%;
+                            padding: 20px;
+                            border: 1px solid #ddd;
+                            margin-top: 20px;
+                        }
+                        .invoice-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .invoice-details {
+                            margin-bottom: 20px;
+                        }
+                        .invoice-details table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .invoice-details th, .invoice-details td {
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                            text-align: left;
+                        }
+                        .invoice-details th {
+                            background-color: #f4f4f4;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="invoice-container">
+                        <div class="invoice-header">
+                            <h1>فاتورة بيع</h1>
+                        </div>
+                        <div class="invoice-details">
+                            <table>
+                                <tr>
+                                    <th>العميل</th>
+                                    <td>${customerName}</td>
+                                </tr>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <td>${productName}</td>
+                                </tr>
+                                <tr>
+                                    <th>الكمية</th>
+                                    <td>${quantity}</td>
+                                </tr>
+                                <tr>
+                                    <th>السعر</th>
+                                    <td>${price.toLocaleString()} د.ع</td>
+                                </tr>
+                                <tr>
+                                    <th>المجموع</th>
+                                    <td>${total.toLocaleString()} د.ع</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            invoiceWindow.document.close();
+            invoiceWindow.focus();
+            invoiceWindow.print();
+        }
+
+        // بداية التشغيل
+        showSection('dashboard');
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق المحاسبة</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+        .invoice-container, .receipt-container {
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .invoice-header, .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-details, .receipt-details {
+            margin-bottom: 20px;
+        }
+        .invoice-details table, .receipt-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .invoice-details th, .invoice-details td, .receipt-details th, .receipt-details td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .invoice-details th, .receipt-details th {
+            background-color: #f4f4f4;
+        }
+        .receipt-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .receipt-logo img {
+            width: 100px;
+        }
+        .receipt-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- باقي أجزاء البرنامج هنا -->
+
+        <!-- تسديد الأقساط -->
+        <div id="payments" class="section">
+            <h1><i class="fas fa-dollar-sign"></i> تسديد الأقساط</h1>
+            <form onsubmit="submitPayment(); return false;">
+                <div>
+                    <label for="customer-select">اختر الزبون:</label>
+                    <select id="customer-select"></select>
+                </div>
+                <div>
+                    <label for="payment-amount">المبلغ المدفوع:</label>
+                    <input type="number" id="payment-amount" step="0.01" min="0" required>
+                </div>
+                <button type="submit">تسديد</button>
+            </form>
+            <div class="receipt-container" id="receipt-container" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const customersData = [];
+        const paymentsData = [];
+        const storeAddress = 'شارع المحل، المدينة، الدولة'; // عنوان المحل
+
+        function populateCustomerSelect() {
+            const customerSelect = document.getElementById('customer-select');
+            customerSelect.innerHTML = '<option value="">اختر الزبون</option>';
+
+            customersData.forEach((customer, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = customer.name;
+                customerSelect.appendChild(option);
+            });
+        }
+
+        function submitPayment() {
+            const customerIndex = document.getElementById('customer-select').value;
+            const amount = parseFloat(document.getElementById('payment-amount').value);
+            const customer = customersData[customerIndex];
+
+            if (customerIndex !== '' && !isNaN(amount) && amount > 0) {
+                paymentsData.push({ customer: customer.name, amount, date: new Date().toLocaleDateString() });
+                customer.amount = (customer.amount || 0) - amount;
+                showCustomers();
+                showPayments();
+                printInvoice(customer.name, amount, customer.amount);
+                document.getElementById('payment-amount').value = '';
+            } else {
+                alert('يرجى إدخال جميع الحقول بشكل صحيح.');
+            }
+        }
+
+        function showCustomers() {
+            const customersList = document.getElementById('customers-list');
+            customersList.innerHTML = '';
+
+            customersData.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.address}</td>
+                    <td>${customer.item}</td>
+                    <td>${customer.amount.toLocaleString()} د.ع</td>
+                `;
+                customersList.appendChild(row);
+            });
+        }
+
+        function showPayments() {
+            const paymentList = document.getElementById('payment-list');
+            paymentList.innerHTML = '';
+
+            paymentsData.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.amount.toLocaleString()} د.ع</td>
+                    <td>${payment.date}</td>
+                `;
+                paymentList.appendChild(row);
+            });
+        }
+
+        function printInvoice(customerName, amountPaid, remainingAmount) {
+            const receiptWindow = window.open('', '', 'width=600,height=400');
+            receiptWindow.document.write(`
+                <html>
+                <head>
+                    <title>فاتورة تسديد</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                        }
+                        .receipt-container {
+                            width: 100%;
+                            padding: 20px;
+                            border: 1px solid #ddd;
+                            margin-top: 20px;
+                        }
+                        .receipt-logo {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .receipt-logo img {
+                            width: 100px;
+                        }
+                        .receipt-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .receipt-header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        .receipt-details {
+                            margin-bottom: 20px;
+                        }
+                        .receipt-details table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .receipt-details th, .receipt-details td {
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                            text-align: left;
+                        }
+                        .receipt-details th {
+                            background-color: #f4f4f4;
+                        }
+                        .receipt-footer {
+                            margin-top: 20px;
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-container">
+                        <div class="receipt-logo">
+                            <img src="logo.png" alt="وهب للمحاسبة">
+                        </div>
+                        <div class="receipt-header">
+                            <h1>فاتورة تسديد</h1>
+                        </div>
+                        <div class="receipt-details">
+                            <table>
+                                <tr>
+                                    <th>العميل</th>
+                                    <td>${customerName}</td>
+                                </tr>
+                                <tr>
+                                    <th>المبلغ المدفوع</th>
+                                    <td>${amountPaid.toLocaleString()} د.ع</td>
+                                </tr>
+                                <tr>
+                                    <th>المبلغ المتبقي</th>
+                                    <td>${remainingAmount.toLocaleString()} د.ع</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="receipt-footer">
+                            <p>${storeAddress}</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            receiptWindow.document.close();
+            receiptWindow.focus();
+            receiptWindow.print();
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق المحاسبة</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+        /* إضافة التنسيقات الخاصة بالبرنامج هنا */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- باقي أجزاء البرنامج هنا -->
+
+        <!-- تسديد الأقساط -->
+        <div id="payments" class="section">
+            <h1><i class="fas fa-dollar-sign"></i> تسديد الأقساط</h1>
+            <form onsubmit="submitPayment(); return false;">
+                <div>
+                    <label for="customer-select">اختر الزبون:</label>
+                    <select id="customer-select"></select>
+                </div>
+                <div>
+                    <label for="payment-amount">المبلغ المدفوع:</label>
+                    <input type="number" id="payment-amount" step="0.01" min="0" required>
+                </div>
+                <button type="submit">تسديد</button>
+            </form>
+            <div class="receipt-container" id="receipt-container" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const customersData = loadCustomers();
+        const paymentsData = loadPayments();
+        const storeAddress = 'شارع المحل، المدينة، الدولة'; // عنوان المحل
+
+        function populateCustomerSelect() {
+            const customerSelect = document.getElementById('customer-select');
+            customerSelect.innerHTML = '<option value="">اختر الزبون</option>';
+
+            customersData.forEach((customer, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = customer.name;
+                customerSelect.appendChild(option);
+            });
+        }
+
+        function submitPayment() {
+            const customerIndex = document.getElementById('customer-select').value;
+            const amount = parseFloat(document.getElementById('payment-amount').value);
+            const customer = customersData[customerIndex];
+
+            if (customerIndex !== '' && !isNaN(amount) && amount > 0) {
+                paymentsData.push({ customer: customer.name, amount, date: new Date().toLocaleDateString() });
+                savePayments();
+                customer.amount = (customer.amount || 0) - amount;
+                showCustomers();
+                showPayments();
+                printInvoice(customer.name, amount, customer.amount);
+                document.getElementById('payment-amount').value = '';
+            } else {
+                alert('يرجى إدخال جميع الحقول بشكل صحيح.');
+            }
+        }
+
+        function showCustomers() {
+            const customersList = document.getElementById('customers-list');
+            customersList.innerHTML = '';
+
+            customersData.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.address}</td>
+                    <td>${customer.item}</td>
+                    <td>${customer.amount ? customer.amount.toLocaleString() + ' د.ع' : 'غير محدد'}</td>
+                `;
+                customersList.appendChild(row);
+            });
+        }
+
+        function showPayments() {
+            const paymentList = document.getElementById('payment-list');
+            paymentList.innerHTML = '';
+
+            paymentsData.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.amount.toLocaleString()} د.ع</td>
+                    <td>${payment.date}</td>
+                `;
+                paymentList.appendChild(row);
+            });
+        }
+
+        function printInvoice(customerName, amountPaid, remainingAmount) {
+            const receiptWindow = window.open('', '', 'width=600,height=400');
+            receiptWindow.document.write(`
+                <html>
+                <head>
+                    <title>فاتورة تسديد</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                        }
+                        .receipt-container {
+                            width: 100%;
+                            padding: 20px;
+                            border: 1px solid #ddd;
+                            margin-top: 20px;
+                        }
+                        .receipt-logo {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .receipt-logo img {
+                            width: 100px;
+                        }
+                        .receipt-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .receipt-header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        .receipt-details {
+                            margin-bottom: 20px;
+                        }
+                        .receipt-details table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .receipt-details th, .receipt-details td {
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                            text-align: left;
+                        }
+                        .receipt-details th {
+                            background-color: #f4f4f4;
+                        }
+                        .receipt-footer {
+                            margin-top: 20px;
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-container">
+                        <div class="receipt-logo">
+                            <img src="logo.png" alt="وهب للمحاسبة">
+                        </div>
+                        <div class="receipt-header">
+                            <h1>فاتورة تسديد</h1>
+                        </div>
+                        <div class="receipt-details">
+                            <table>
+                                <tr>
+                                    <th>العميل</th>
+                                    <td>${customerName}</td>
+                                </tr>
+                                <tr>
+                                    <th>المبلغ المدفوع</th>
+                                    <td>${amountPaid.toLocaleString()} د.ع</td>
+                                </tr>
+                                <tr>
+                                    <th>المبلغ المتبقي</th>
+                                    <td>${remainingAmount.toLocaleString()} د.ع</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="receipt-footer">
+                            <p>${storeAddress}</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            receiptWindow.document.close();
+            receiptWindow.focus();
+            receiptWindow.print();
+        }
+
+        // استرجاع البيانات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            customersData.push(...loadCustomers());
+            paymentsData.push(...loadPayments());
+            populateCustomerSelect();
+            showCustomers();
+            showPayments();
+        });
+
+        // دالة لحفظ بيانات الزبائن
+        function saveCustomers() {
+            localStorage.setItem('customers', JSON.stringify(customersData));
+        }
+
+        // دالة لحفظ بيانات المدفوعات
+        function savePayments() {
+            localStorage.setItem('payments', JSON.stringify(paymentsData));
+        }
+
+        // دالة لاسترجاع بيانات الزبائن
+        function loadCustomers() {
+            const savedCustomers = localStorage.getItem('customers');
+            if (savedCustomers) {
+                return JSON.parse(savedCustomers);
+            }
+            return [];
+        }
+
+        // دالة لاسترجاع بيانات المدفوعات
+        function loadPayments() {
+            const savedPayments = localStorage.getItem('payments');
+            if (savedPayments) {
+                return JSON.parse(savedPayments);
+            }
+            return [];
+        }
+    </script>
+</body>
+</html>
